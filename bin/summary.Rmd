@@ -1,0 +1,310 @@
+---
+title: "Plot Remi's Simulations"
+author: "Royal T Booker"
+date: "November 27, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Plotting Remi's simulations
+
+
+
+```{r cars, echo=FALSE}
+rm(list = ls())
+library(ggplot2)
+library(stringr)	
+library(RColorBrewer)
+library(ggthemes)
+```
+
+
+```{r pressure, echo=FALSE}
+## Call the dataframe remi, just to be kewl
+remi_raw <- read.csv('/media/booker/KingBolete/work/GeneticRescue/simulations/mean.SuperSet.summary.csv.gz')
+str( remi_raw )
+```
+
+That's a whole lot of data, so let's slice it up a bit to make things quicker...
+
+Let's ignore the Maladapted climate (MAC) alleles for the time being.
+
+Let's also ignore pulsed migration for now.
+
+Let's plot the Ne = 10000 simulations.
+
+```{r slicer, echo=FALSE}
+
+remi <- remi_raw[remi_raw$nbLoci_PAC == 0,]
+
+remi$selScenario <-  paste(remi$S_OD, remi$nbLoci_OD, sep = '; ')
+
+remi <- remi[str_count(remi$migration_scenario, ',') == 1,]
+
+remi_noMAC <- remi[ remi$nbLoci_MAC == 0, ]
+
+remi_MAC <- remi[ remi$nbLoci_MAC > 0, ] 
+
+#remi_noMAC_PAC_0.05 <-remi_noMAC[remi_noMAC$fit_PAC ==  '1 0.99 0.98',]
+
+```
+
+# No pre-adapted climate (PAC) alleles
+```{r xxx, echo=FALSE}
+
+levels(as.factor(remi$nbLoci_OD))
+
+noMAC_N10000 <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = relFitness, col = selScenario))+
+  geom_hline(aes(yintercept = 1.0 ), alpha = 0.6, lty = 2)+
+  geom_line()+
+  ggtitle("noMAC;  N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Relative Fitness', limits = c(0.9, 1.05))+
+  theme_bw()
+
+
+noMAC_N10000_var <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = P0_varFit, col = selScenario))+
+  geom_line()+
+  ggtitle("noMAC;  N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Variance in Fitness')+
+  theme_bw()
+
+pdf("noMAC_0PAC_N10000_relFit.pdf", width = 6, height = 8)
+print(noMAC_N10000)
+dev.off()
+
+pdf("noMAC_0PAC_N10000_varFit.pdf", width = 6, height = 8)
+print(noMAC_N10000_var)
+dev.off()
+
+print(noMAC_N10000)
+print(noMAC_N10000_var)
+
+```
+
+
+scale_colour_brewer(palette = "Paired")
+
+# 5 pre-adapted climate (PAC) alleles
+
+```{r slicer2, echo=FALSE}
+
+remi <- remi_raw[remi_raw$nbLoci_PAC == 5,]
+
+remi$selScenario <-  paste(remi$S_OD, remi$nbLoci_OD, sep = '; ')
+
+remi <- remi[str_count(remi$migration_scenario, ',') == 1,]
+
+remi_noMAC <- remi[ remi$nbLoci_MAC == 0, ]
+
+remi_MAC <- remi[ remi$nbLoci_MAC > 0, ] 
+
+#remi_noMAC_PAC_0.05 <-remi_noMAC[remi_noMAC$fit_PAC ==  '1 0.99 0.98',]
+
+```
+
+
+
+```{r xxx2, echo=FALSE}
+levels(as.factor(remi$nbLoci_OD))
+
+noMAC_N10000 <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = relFitness, col = selScenario))+
+  geom_hline(aes(yintercept = 1.0 ), alpha = 0.6, lty = 2)+
+  geom_line()+
+  ggtitle("0 MAC; 5 PAC; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Relative Fitness')+
+  theme_bw()
+
+noMAC_N10000_var <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = P0_varFit, col = selScenario))+
+  geom_line()+
+  ggtitle("0 MAC; 5 PAC; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Variance in Fitness')+
+  theme_bw()
+
+pdf("noMAC_5PAC_N10000_relFit_5alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000)
+dev.off()
+
+pdf("noMAC_5PAC_N10000_varFit_5alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000_var)
+dev.off()
+
+print(noMAC_N10000)
+print(noMAC_N10000_var)
+
+```
+
+
+
+# 50 pre-adapted climate (PAC) alleles
+
+
+```{r slicer3, echo=FALSE}
+
+remi <- remi_raw[remi_raw$nbLoci_PAC == 50,]
+
+remi$selScenario <-  paste(remi$S_OD, remi$nbLoci_OD, sep = '; ')
+
+remi <- remi[str_count(remi$migration_scenario, ',') == 1,]
+
+remi_noMAC <- remi[ remi$nbLoci_MAC == 0, ]
+
+remi_MAC <- remi[ remi$nbLoci_MAC > 0, ] 
+
+#remi_noMAC_PAC_0.05 <-remi_noMAC[remi_noMAC$fit_PAC ==  '1 0.99 0.98',]
+
+```
+
+
+
+```{r xxx3, echo=FALSE}
+levels(as.factor(remi$nbLoci_OD))
+
+noMAC_N10000 <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = relFitness, col = selScenario))+
+  geom_hline(aes(yintercept = 1.0 ), alpha = 0.6, lty = 2)+
+  geom_line()+
+  ggtitle("0 MAC; 50 PAC; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Relative Fitness')+
+  theme_bw()
+
+
+noMAC_N10000_var <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = P0_varFit, col = selScenario))+
+  geom_line()+
+  ggtitle("0 MAC; 50 PAC; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Variance in Fitness')+
+  theme_bw()
+
+pdf("noMAC_50PAC_N10000_relFit_50alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000)
+dev.off()
+
+pdf("noMAC_50PAC_N10000_varFit_50alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000_var)
+dev.off()
+print(noMAC_N10000)
+print(noMAC_N10000_var)
+
+```
+
+
+# 5 Maladapted climate alleles; 0 PAC alleles
+
+```{r slicer4, echo=FALSE}
+
+remi <- remi_raw[remi_raw$nbLoci_PAC == 0,]
+
+remi$selScenario <-  paste(remi$S_OD, remi$nbLoci_OD, sep = '; ')
+
+remi <- remi[str_count(remi$migration_scenario, ',') == 1,]
+
+remi_noMAC <- remi[ remi$nbLoci_MAC == 5, ]
+
+remi_MAC <- remi[ remi$nbLoci_MAC > 0, ] 
+
+#remi_noMAC_PAC_0.05 <-remi_noMAC[remi_noMAC$fit_PAC ==  '1 0.99 0.98',]
+
+```
+
+
+
+```{r xxx4, echo=FALSE}
+levels(as.factor(remi$nbLoci_OD))
+
+noMAC_N10000 <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = relFitness, col = selScenario))+
+  geom_hline(aes(yintercept = 1.0 ), alpha = 0.6, lty = 2)+
+  geom_line()+
+  ggtitle("5 MAC; 0 PAC; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Relative Fitness')+
+  theme_bw()
+
+
+noMAC_N10000_var <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = P0_varFit, col = selScenario))+
+  geom_line()+
+  ggtitle("5 MAC; 0 PAC; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Variance in Fitness')+
+  theme_bw()
+
+pdf("5MAC_0PAC_N10000_relFit_5alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000)
+dev.off()
+
+pdf("5MAC_0PAC_N10000_varFit_5alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000_var)
+dev.off()
+print(noMAC_N10000)
+print(noMAC_N10000_var)
+
+```
+
+
+```{r slicer5, echo=FALSE}
+
+remi <- remi_raw[remi_raw$nbLoci_PAC == 5,]
+
+remi$selScenario <-  paste(remi$S_OD, remi$nbLoci_OD, sep = '; ')
+
+remi <- remi[str_count(remi$migration_scenario, ',') == 1,]
+
+remi_noMAC <- remi[ remi$nbLoci_MAC == 5, ]
+
+remi_MAC <- remi[ remi$nbLoci_MAC > 0, ] 
+
+#remi_noMAC_PAC_0.05 <-remi_noMAC[remi_noMAC$fit_PAC ==  '1 0.99 0.98',]
+
+```
+
+# 5 Maladapted climate alleles; 5 PAC alleles
+
+
+```{r xxx5, echo=FALSE}
+levels(as.factor(remi$nbLoci_OD))
+
+noMAC_N10000 <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = relFitness, col = selScenario))+
+  geom_hline(aes(yintercept = 1.0 ), alpha = 0.6, lty = 2)+
+  geom_line()+
+  ggtitle("5 MAC; 5 PAC; PAC = 0.05; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Relative Fitness')+
+  theme_bw()
+
+
+noMAC_N10000_var <- ggplot(data = remi_noMAC[remi_noMAC$N == 10000,], aes(x = Generation, y = P0_varFit, col = selScenario))+
+  geom_line()+
+  ggtitle("5 MAC; 5 PAC; PAC = 0.05; N = 10000")+
+scale_colour_brewer(expression(s[OD]*'; # Loci'), palette = "Paired")+
+  facet_grid( migration_scenario ~ fit_PAC)+
+  scale_y_continuous('Variance in Fitness')+
+  theme_bw()
+
+pdf("5MAC_5PAC_N10000_relFit_5alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000)
+dev.off()
+
+pdf("5MAC_5PAC_N10000_varFit_5alleles.pdf", width = 6, height = 8)
+print(noMAC_N10000_var)
+dev.off()
+print(noMAC_N10000)
+print(noMAC_N10000_var)
+
+```
