@@ -1,5 +1,6 @@
-# Assisted-Gene-Flow
+# Assisted-Gene-Flow (... or Evolutionary Precognition)
 
+![](newRescue/precog.jpg)
 This repository contains the code for analysing the SimBit simulations we performed in the Whitlock lab for our Assisted Gene Flow project.
 
 Remi ran a whole lot of simuations (hundreds of thousands) of sshort simulations modelling assisted gene flow as a means to acheive evolutionary rescue. We did a semi-factorial simulation design, with lots and lots of parameter combinations. This produced a whole heck of a lot of results files. The simulations were analysed using something like the following:
