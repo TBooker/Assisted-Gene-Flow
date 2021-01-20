@@ -52,13 +52,20 @@ awk 'FNR==2 {print FILENAME, $0}' outputs/A.0.6.*_1.fitStats > A.0.6_generation_
 ## This takes a few minutes
 
 
-# Now take the means, and combine them into one big flipping file that can be used to explore parameter space... T
+# Now take the means, and combine them into one big flipping file that can be used to explore parameter space... 
 python ../bin/parseSimBitOutput_awkOutput.py --input summary/ --simbit paramGrid_A.0.6.csv --output A.0.6.output.csv --gen0 A.0.6_generation_0_fitnesses.txt
 
 ## The above will generate a file for each of the population sizes that were simulated.
-
-## I sent those to Dea and she then worked her R magic to make beautiful plots.
+## E.g. 100.mean.A.0.6.output.csv, 1000.mean.A.0.6.output.csv, 10000.mean.A.0.6.output.csv
+## Those files are VERY large, so you should probably GZIP them or something before finishing up
 
 ```
 
-The script that Dea wrote for making plots is at [here](bin/here) 
+The resulting summary files (e.g. 100.mean.A.0.6.output.csv, 1000.mean.A.0.6.output.csv, 10000.mean.A.0.6.output.csv) are included with the raw data.
+
+The script that Dea wrote for making plots is [here](bin/here). That script makes all the plots from the paper except Figure S1. 
+
+With Fig. S1, we wanted to demonstrate how much variability there was between replicates to justify the use of the mean for all the results shown in the other figures. 
+
+To extract the simulation results for a set of simualtion parameters and store them in a file, I wrote [minMax_and_PlotReps.py](minMax_and_PlotReps.py). It's a very simple Python script that uses Pandas to extract the IDs of parameter combinations for a set of conditions that we wanted to highlight. 
+
