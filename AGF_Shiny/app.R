@@ -2,9 +2,10 @@
 library(shiny)
 library(tidyverse)
 
+
 #### Reading the data files
-wideFile_Fitness <- read.csv("/Users/whitlock/Desktop/AGF_Shiny/supersetMeansRelFitnessA06.csv", stringsAsFactors = FALSE)
-wideFile_Replacement <- read.csv("/Users/whitlock/Desktop/AGF_Shiny/supersetMeansReplacementA06.csv", stringsAsFactors = FALSE)
+wideFile_Fitness <- read.csv("supersetMeansRelFitnessA06.csv", stringsAsFactors = FALSE)
+wideFile_Replacement <- read.csv("supersetMeansReplacementA06.csv", stringsAsFactors = FALSE)
 
 
 ### Converting the wide file into long format  --NOTE: It may be worth embedding
@@ -15,7 +16,7 @@ gen$genChar=substr(gen$genChar,2,4)
 gen$Generation=as.numeric(gen$genChar)
 
 #Genome replacement df
-genRep =  gather(wideFile_Replacement, key=genChar, value = hybridIndex, "g001":"g100", factor_key=TRUE)
+genRep =  gather(wideFile_Replacement, key=genChar, value = LGR, "g001":"g100", factor_key=TRUE)
 genRep$genChar=substr(genRep$genChar,2,4)
 genRep$Generation=as.numeric(genRep$genChar)
 
@@ -23,11 +24,12 @@ genRep$Generation=as.numeric(genRep$genChar)
 ### User interface
 
 ui <- fluidPage(
-    titlePanel(HTML("<h2>Assisted Gene Flow (AGF)</h2><h3>Fitness and proportion local genotypes remaining </h3>")),
+    titlePanel(HTML("<h2>Assisted Gene Flow (AGF)</h2><div id = \"credits\">Developed as supplementary material for  <a href=\"https://www.biorxiv.org/\">a paper exploring the fitness effects of AGF</a>  
+        by Jared Grummer, Tom Booker, Rémi Matthey-Doret, Pirmin Nietlisbach, Andrea Thomaz, and Mike Whitlock at the University of British Columbia. </p></div>")),
     sidebarLayout(
         sidebarPanel(
             radioButtons("responseVar", "Response variable",
-                         choices = c( "Fitness", "Local genes remaining"),
+                         choices = c( "Fitness", "Local genomic replacement"),
                          selected = "Fitness"),
             radioButtons("popSize", "Population size, N",
                          choices = c( 1000, 10000),
@@ -61,14 +63,16 @@ ui <- fluidPage(
                          inline=TRUE),
             radioButtons("fit_PAC_param",
                          HTML("<p >&Delta;<sub>PA</sub>, Maximum fitness change, preadapted loci</p>"),
-                         choices = c(0.1, 0.5),
+                         choiceNames = c("10%", "50%"),
+                         choiceValues = c(0.1, 0.5),
                          selected = 0.1,
                          inline=TRUE),
             conditionalPanel(
                 "input.nbLoci_MAC>0",
                 radioButtons("fit_MAC_param",
                              HTML("<p >&Delta;<sub>MA</sub>, Maximum fitness change, maladapted loci</p>"),
-                         choices = c(0.1, 1, 10),      
+                             choiceNames = c("9.1%","50%","91%"),  
+                             choiceValues = c(0.1, 1, 10),      
                          inline=TRUE),
                 selected = 0.1),
             
@@ -84,8 +88,7 @@ ui <- fluidPage(
                   ),
     ),
 ####  Footer note    
-    HTML("<div id = \"credits\">Developed as supplementary material for  <a href=\"https://www.biorxiv.org/\">a paper exploring the fitness effects of AGF</a>  
-        by Jared Grummer, Tom Booker, Rémi Matthey-Doret, Pirmin Nietlisbach, Andrea Thomaz, and Mike Whitlock at the University of British Columbia. </p></div>")
+    HTML("<div id = \"notes\">Values are plotted for every generation during generations 1-20, for every second generation for generations 20-30, and for every fifth generation after that. </p></div>")
 )
 
 server <- function(input, output) {
@@ -134,8 +137,8 @@ server <- function(input, output) {
     
     minFit = reactive({min(filteredFitness()$relFitness)})
     maxFit = reactive({max(filteredFitness()$relFitness)})
-    minRep = reactive({min(filteredReplacement()$hybridIndex)})
-    maxRep = reactive({max(filteredReplacement()$hybridIndex)})
+    minRep = reactive({min(filteredReplacement()$LGR)})
+    maxRep = reactive({max(filteredReplacement()$LGR)})
 
 ####  Making the plot    
 
@@ -157,11 +160,11 @@ server <- function(input, output) {
                 theme(aspect.ratio=2/3)
             
         } else
-            if(input$responseVar=="Local genes remaining"){
-                ggplot( filteredReplacement()%>% filter(numPulses==1), aes(x = Generation, y = hybridIndex, col = DeltaOD)) +
+            if(input$responseVar=="Local genomic replacement"){
+                ggplot( filteredReplacement()%>% filter(numPulses==1), aes(x = Generation, y = LGR, col = DeltaOD)) +
                     geom_line(size = 1.5)+
                     
-                    labs(x="Generations", y = "Proportion resident genotype \n remaining in recipient population",
+                    labs(x="Generations", y = "Local Genomic Replacement",
                          colour = expression(italic(Delta[OD])), fill = expression(italic(O[d]))) +
                     scale_color_manual(values=c("black", "#2c7fb8", "#e6550d")) +
                     ylim(minRep(),maxRep())+
@@ -188,12 +191,12 @@ server <- function(input, output) {
                 theme(text = element_text(size=16))+
                 theme(aspect.ratio=2/3)
         } else 
-            if(input$responseVar=="Local genes remaining"){
+            if(input$responseVar=="Local genomic replacement"){
                 ggplot( filteredReplacement()%>% filter(numPulses==5) %>% filter(pulseInterval==input$pulseInterval), 
-                        aes(x = Generation, y = hybridIndex, col = DeltaOD)) +
+                        aes(x = Generation, y = LGR, col = DeltaOD)) +
                     geom_line(size = 1.5)+
                     
-                    labs(x="Generations", y = "Proportion resident genotype \n remaining in recipient population",
+                    labs(x="Generations", y = "Local Genomic Replacement",
                          colour = expression(italic(Delta[OD])), fill = expression(italic(O[d]))) +
                     scale_color_manual(values=c("black", "#2c7fb8", "#e6550d")) +
                     ylim(minRep(),maxRep())+

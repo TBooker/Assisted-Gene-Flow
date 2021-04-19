@@ -5,7 +5,7 @@ library(tidyverse)
 # Load each a.0.6 file 
 
 #start100 = read.csv("/Users/whitlock/Desktop/AGF_Shiny/A.0.6_processed/100.mean.A.0.6.output.csv")
-# NOte - I believe we decided to not include N=100 cases.  We don't have every mogratin scenario for all N
+# NOte - I believe we decided to not include N=100 cases.  We don't have every migratin scenario for all N
 
 start1000 = read.csv("/Users/whitlock/Desktop/AGF_Shiny/A.0.6_processed/1000.mean.A.0.6.output.csv")
 start10000 = read.csv("/Users/whitlock/Desktop/AGF_Shiny/A.0.6_processed/10000.mean.A.0.6.output.csv")
@@ -29,6 +29,11 @@ rm(start1000)
 rm(start10000)
 
 #Add new necessary columns (e.g. pulse type)
+
+## Making a colum for Local Genomic Replacement (LGR) instead of hybridIndex
+
+start$LGR= 1 - start$hybridIndex
+start = start %>% select(-hybridIndex)
 
 ##  Make a column that contains the per pulse migration rate
 
@@ -78,7 +83,7 @@ start$pulseInterval[which(start$migration_scenario=="0.5,1")]=0
 # DeltaOD
 start$S_OD[which(is.na(start$S_OD))]=0
 start$DeltaOD[start$S_OD == "0.009205015" | start$S_OD == "0.04688023" | start$S_OD == "0.09595823" | start$S_OD == "0.5811388"] <- "60%"
-start$DeltaOD[start$S_OD == "0.002233927" |start$S_OD == "0.01121965" | start$S_OD == "0.02256518" | start$S_OD == "0.118034"] <- "20%"
+start$DeltaOD[start$S_OD == "0.002233927" | start$S_OD == "0.01121965" | start$S_OD == "0.02256518" | start$S_OD == "0.118034"] <- "20%"
 start$DeltaOD[start$S_OD == "0"] <- "0%"
 
 # Making column for total replacement fraction
@@ -98,17 +103,17 @@ start =start %>% filter(dominanceCoef_MAC==0.5)
 # dropping columns not used in shiny app
 start = start %>% select(-migration_scenario, -dominanceCoef_MAC,-dominanceCoef_PAC)
 
-# Put into wide format  and save (probably easiest to have separate files for relative fitness and the hybridIndex)
+# Put into wide format  and save (probably easiest to have separate files for relative fitness and the LGR)
 dataCharGen=start
-dataCharGen$genChar= str_pad(as.character(dataCharGen$Generation),3,side="left",pad="0") 
+dataCharGen$genChar= str_pad(as.character(dataCharGen$Generation),3,side="left", pad="0") 
 dataCharGen=dataCharGen %>% select(-Generation) 
 dataCharGen$genChar=paste("g",dataCharGen$genChar, sep="")
   
-wideVersion_relFitness = dataCharGen %>% select(-hybridIndex,-Fitness) %>% spread(key=genChar, value = relFitness)
-wideVersion_hybridIndex = dataCharGen %>% select(-relFitness,-Fitness) %>% spread(key=genChar, value = hybridIndex)
+wideVersion_relFitness = dataCharGen %>% select(-LGR,-Fitness) %>% spread(key=genChar, value = relFitness)
+wideVersion_LGR = dataCharGen %>% select(-relFitness,-Fitness) %>% spread(key=genChar, value = LGR)
 
 write_csv(wideVersion_relFitness,"/Users/whitlock/Desktop/AGF_Shiny/supersetMeansRelFitnessA06.csv")
-write_csv(wideVersion_hybridIndex,"/Users/whitlock/Desktop/AGF_Shiny/supersetMeansReplacementA06.csv")
+write_csv(wideVersion_LGR,"/Users/whitlock/Desktop/AGF_Shiny/supersetMeansReplacementA06.csv")
 
 
 #  Let's try to reconstruct the long format:
